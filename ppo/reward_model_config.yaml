@@ -1,0 +1,150 @@
+# ============================================
+# Reward Model 独立配置文件
+# ============================================
+# 当使用独立的Reward Model时，可以使用此配置
+#
+# 使用方式:
+# 1. 使用预训练的RM模型
+# 2. 自定义reward function
+# ============================================
+
+# ============================================
+# 方式1: 使用预训练Reward Model
+# ============================================
+reward_model:
+  # 是否启用Reward Model
+  enable: true
+
+  # 使用reward循环
+  use_reward_loop: true
+
+  # 奖励管理器类型
+  # naive: 基础奖励计算
+  # prime: PRIME过程奖励
+  # dapo: DAPO专用奖励
+  reward_manager: naive
+
+  # 独立资源池 (Reward Model使用独立GPU)
+  enable_resource_pool: false
+  nnodes: 1
+  n_gpus_per_node: 2
+
+  # Reward Model配置
+  model:
+    # 预训练Reward Model路径
+    # 推荐模型:
+    # - RLHFlow/ArmoRM-Llama3-8B-v0.1
+    # - berkeley-nest/Starling-RM-7B-alpha
+    # - OpenAssistant/reward-model-deberta-v3-large-v2
+    path: RLHFlow/ArmoRM-Llama3-8B-v0.1
+
+    # 是否信任远程代码
+    trust_remote_code: false
+
+  # 推理配置
+  rollout:
+    name: vllm
+    tensor_model_parallel_size: 2
+    gpu_memory_utilization: 0.5
+    max_model_len: 4096
+
+# ============================================
+# 方式2: 自定义Reward Function
+# ============================================
+# 当 reward_model.enable = false 时使用
+
+custom_reward_function:
+  # 自定义奖励函数文件
+  # 文件需要实现 compute_score 函数
+  path: ../common/reward_functions.py
+
+  # 函数名称
+  name: compute_score
+
+  # 传递给函数的额外参数
+  reward_kwargs:
+    correct_score: 1.0
+    format_score: 0.1
+    wrong_score: 0.0
+
+# ============================================
+# Reward Function 示例实现
+# ============================================
+#
+# def compute_score(
+#     data_source: str,
+#     solution_str: str,
+#     ground_truth: str,
+#     extra_info: dict = None
+# ) -> float:
+#     """
+#     计算奖励分数
+#
+#     Args:
+#         data_source: 数据来源标识，用于选择奖励逻辑
+#         solution_str: 模型生成的回复
+#         ground_truth: 标准答案
+#         extra_info: 额外信息
+#
+#     Returns:
+#         float: 奖励分数
+#     """
+#     # 数学推理任务
+#     if data_source in ["gsm8k", "math"]:
+#         answer = extract_answer(solution_str)
+#         if answer == ground_truth:
+#             return 1.0
+#         return 0.0
+#
+#     # 代码生成任务
+#     elif data_source == "code":
+#         return run_tests(solution_str, ground_truth)
+#
+#     # 默认
+#     return 0.0
+
+# ============================================
+# 常用预训练Reward Model
+# ============================================
+#
+# 1. ArmoRM (推荐)
+#    - 路径: RLHFlow/ArmoRM-Llama3-8B-v0.1
+#    - 特点: 高质量、支持多维度评估
+#
+# 2. Starling-RM
+#    - 路径: berkeley-nest/Starling-RM-7B-alpha
+#    - 特点: 基于Llama2，广泛使用
+#
+# 3. OpenAssistant RM
+#    - 路径: OpenAssistant/reward-model-deberta-v3-large-v2
+#    - 特点: 轻量级，速度快
+#
+# 4. UltraRM
+#    - 路径: openbmb/UltraRM-13b
+#    - 特点: 高精度，但资源需求大
+#
+# ============================================
+
+# ============================================
+# 多奖励组合配置
+# ============================================
+# 可以同时使用RM和reward function
+
+composite_reward:
+  enable: false
+
+  # 权重配置
+  weights:
+    rm_score: 0.7          # Reward Model得分权重
+    rule_score: 0.3        # 规则奖励权重
+
+  # 规则奖励
+  rule_rewards:
+    - type: length_penalty
+      min_length: 50
+      max_length: 2000
+      penalty: 0.1
+
+    - type: format_check
+      required_markers: ["答案", "\\boxed"]
+      bonus: 0.1

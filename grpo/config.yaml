@@ -1,0 +1,154 @@
+# ============================================
+# GRPO (Group Relative Policy Optimization) 配置文件
+# ============================================
+# GRPO特点:
+# - 无需Critic模型
+# - 使用组内相对奖励作为优势估计
+# - 每个prompt采样多个response进行对比
+# ============================================
+
+defaults:
+  - _self_
+
+# ============================================
+# 数据配置
+# ============================================
+data:
+  train_files: ${oc.env:TRAIN_DATA,./data/example_grpo.parquet}
+  val_files: null
+  train_batch_size: 256
+  max_prompt_length: 512
+  max_response_length: 1024
+  prompt_key: prompt
+  reward_fn_key: data_source
+  filter_overlong_prompts: false
+  truncation: error
+
+# ============================================
+# GRPO算法配置
+# ============================================
+algorithm:
+  # 核心: 使用grpo优势估计器（不需要Critic）
+  adv_estimator: grpo
+
+  # 按组内标准差归一化优势
+  norm_adv_by_std_in_grpo: true
+
+  # KL惩罚（不在reward中使用，而在loss中使用）
+  use_kl_in_reward: false
+  kl_penalty: low_var_kl
+
+  # KL控制器
+  kl_ctrl:
+    type: fixed
+    kl_coef: 0.001
+
+# ============================================
+# 模型配置
+# ============================================
+actor_rollout_ref:
+  model:
+    path: ${oc.env:MODEL_PATH,Qwen/Qwen2.5-0.5B}
+    tokenizer_path: null
+    trust_remote_code: false
+    enable_gradient_checkpointing: true
+    use_remove_padding: true
+
+    # LoRA配置（可选）
+    lora_rank: 0
+    lora_alpha: 16
+    target_modules: all-linear
+
+  # Actor配置
+  actor:
+    strategy: fsdp
+    grad_clip: 1.0
+
+    optim:
+      lr: 1e-6
+      weight_decay: 0.01
+      lr_warmup_steps_ratio: 0.0
+
+    ppo_mini_batch_size: 64
+    ppo_micro_batch_size_per_gpu: 16
+    ppo_epochs: 1
+    clip_ratio: 0.2
+
+    # GRPO核心: 使用KL loss而非KL在reward中
+    use_kl_loss: true
+    kl_loss_coef: 0.001
+    kl_loss_type: low_var_kl
+
+    # 损失聚合模式
+    # token-mean: 默认
+    # seq-mean-token-sum-norm: DrGRPO (消除长度偏差)
+    loss_agg_mode: token-mean
+
+    fsdp_config:
+      param_offload: false
+      optimizer_offload: false
+
+  # 推理配置 (GRPO关键配置)
+  rollout:
+    name: vllm
+    mode: async
+
+    # GRPO核心参数: 每个prompt采样多个response
+    n: 5                                  # 推荐3-8
+
+    temperature: 1.0                      # 采样温度
+    top_k: -1
+    top_p: 1
+    prompt_length: ${data.max_prompt_length}
+    response_length: ${data.max_response_length}
+    tensor_model_parallel_size: 2
+    gpu_memory_utilization: 0.6
+    log_prob_micro_batch_size_per_gpu: 160
+
+  # Reference Model配置
+  ref:
+    log_prob_micro_batch_size_per_gpu: 160
+    fsdp_config:
+      param_offload: true                 # 卸载以节省显存
+
+# ============================================
+# Critic配置 (GRPO不需要)
+# ============================================
+critic:
+  enable: false                           # GRPO不使用Critic
+
+# ============================================
+# 自定义Reward Function配置
+# ============================================
+custom_reward_function:
+  path: ./reward_func.py
+  name: compute_score
+  reward_kwargs:
+    correct_score: 1.0
+    format_score: 0.1
+    wrong_score: 0.0
+
+# ============================================
+# 训练配置
+# ============================================
+trainer:
+  total_epochs: 15
+  n_gpus_per_node: 8
+  nnodes: 1
+  save_freq: 20
+  test_freq: 5
+  project_name: verl_grpo
+  experiment_name: grpo_experiment
+  logger:
+    - console
+  default_local_dir: ./outputs/checkpoints
+  device: cuda
+
+# ============================================
+# DrGRPO配置 (消除长度偏差)
+# ============================================
+# 如需使用DrGRPO，取消注释以下配置:
+#
+# actor_rollout_ref:
+#   actor:
+#     loss_agg_mode: seq-mean-token-sum-norm

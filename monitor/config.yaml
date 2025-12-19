@@ -1,0 +1,125 @@
+# ============================================
+# 监控面板配置
+# ============================================
+
+# 服务配置
+server:
+  port: 7860
+  host: "0.0.0.0"
+  share: false  # 是否创建公共链接
+
+# 日志配置
+logging:
+  # 日志目录（可通过环境变量 VERL_LOG_DIR 覆盖）
+  log_dir: ./outputs/logs
+
+  # 自动发现模式
+  auto_discover: true
+
+  # 支持的日志格式
+  formats:
+    - jsonl
+    - tensorboard
+    - wandb
+
+# 刷新配置
+refresh:
+  # 自动刷新间隔（秒）
+  interval: 5
+
+  # 指标缓存时间（秒）
+  cache_ttl: 5
+
+# 显示配置
+display:
+  # 默认显示的指标
+  default_metrics:
+    - policy_loss
+    - value_loss
+    - kl_loss
+    - reward_mean
+
+  # 样本显示数量
+  sample_count: 10
+
+  # 图表高度
+  chart_height: 300
+
+  # 主题
+  theme: soft  # soft/default/glass
+
+# 监控指标分类
+metrics:
+  # 损失指标
+  loss:
+    - policy_loss
+    - value_loss
+    - kl_loss
+    - entropy_loss
+
+  # 奖励指标
+  reward:
+    - reward_mean
+    - reward_std
+    - reward_max
+    - reward_min
+
+  # KL相关
+  kl:
+    - kl_divergence
+    - kl_coef
+    - kl_loss
+
+  # 训练进度
+  progress:
+    - step
+    - epoch
+    - learning_rate
+    - grad_norm
+
+  # 系统资源
+  system:
+    - gpu_utilization
+    - gpu_memory_used
+    - gpu_memory_total
+    - throughput
+
+  # 生成质量
+  generation:
+    - response_length_mean
+    - response_length_std
+    - format_accuracy
+
+# 告警配置
+alerts:
+  enable: false
+
+  rules:
+    - name: kl_too_high
+      metric: kl_divergence
+      threshold: 0.1
+      condition: greater_than
+      message: "KL散度过高，可能需要调整学习率或KL系数"
+
+    - name: reward_stagnant
+      metric: reward_mean
+      window: 100
+      condition: no_improvement
+      message: "奖励已经100步没有提升"
+
+    - name: gpu_low_utilization
+      metric: gpu_utilization
+      threshold: 50
+      condition: less_than
+      message: "GPU利用率较低，考虑增大batch size"
+
+# WandB集成（可选）
+wandb:
+  enable: false
+  project: null
+  entity: null
+
+# TensorBoard集成（可选）
+tensorboard:
+  enable: false
+  log_dir: ./outputs/tensorboard

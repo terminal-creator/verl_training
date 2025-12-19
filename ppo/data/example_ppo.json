@@ -1,0 +1,102 @@
+[
+  {
+    "prompt": "计算 15 + 27 的结果，请给出详细的计算过程。",
+    "ground_truth": "42",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个长方形的长是8厘米，宽是5厘米，求它的周长。",
+    "ground_truth": "26",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "小明有12个苹果，他给了小红5个，又买了8个，现在小明有多少个苹果？",
+    "ground_truth": "15",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "计算 3 × 4 + 5 × 2 的值。",
+    "ground_truth": "22",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一辆汽车每小时行驶60公里，3小时能行驶多少公里？",
+    "ground_truth": "180",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "把24平均分成4份，每份是多少？",
+    "ground_truth": "6",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一本书有120页，小明第一天看了35页，第二天看了42页，还剩多少页没看？",
+    "ground_truth": "43",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "计算 100 - 37 + 18 的结果。",
+    "ground_truth": "81",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个正方形的边长是6厘米，求它的面积。",
+    "ground_truth": "36",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "商店有45个玩具，卖出了18个，又进货了30个，现在有多少个玩具？",
+    "ground_truth": "57",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "计算 72 ÷ 8 × 3 的值。",
+    "ground_truth": "27",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "小红有25元钱，买了一本书花了12元，买了一支笔花了3元，还剩多少钱？",
+    "ground_truth": "10",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个三角形的底是10厘米，高是8厘米，求它的面积。",
+    "ground_truth": "40",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "5个小朋友平均分20颗糖果，每人能分到几颗？",
+    "ground_truth": "4",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "计算 (18 + 12) × 2 的结果。",
+    "ground_truth": "60",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一列火车上午9点出发，下午2点到达目的地，行驶了多少小时？",
+    "ground_truth": "5",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "学校图书馆有故事书156本，科技书比故事书少28本，科技书有多少本？",
+    "ground_truth": "128",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "计算 56 ÷ 7 + 32 ÷ 4 的值。",
+    "ground_truth": "16",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个长方体的长是5厘米，宽是4厘米，高是3厘米，求它的体积。",
+    "ground_truth": "60",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "果园里有苹果树48棵，梨树的棵数是苹果树的2倍，梨树有多少棵？",
+    "ground_truth": "96",
+    "data_source": "math_reasoning"
+  }
+]

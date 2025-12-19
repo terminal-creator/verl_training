@@ -1,0 +1,181 @@
+# ============================================
+# GSPO (Group Self-Play Preference Optimization) 配置文件
+# ============================================
+# GSPO特点:
+# - 自对弈: 模型与自己对弈，生成多个候选回复
+# - 组内排序: 使用reward function对回复排序
+# - 偏好优化: 从排序中学习偏好
+# ============================================
+
+defaults:
+  - _self_
+
+# ============================================
+# 数据配置
+# ============================================
+data:
+  train_files: ${oc.env:TRAIN_DATA,./data/example_gspo.parquet}
+  val_files: null
+  train_batch_size: 256
+  max_prompt_length: 512
+  max_response_length: 1024
+  prompt_key: prompt
+  reward_fn_key: data_source
+  filter_overlong_prompts: false
+  truncation: error
+
+# ============================================
+# GSPO算法配置
+# ============================================
+algorithm:
+  # 基于GRPO的优势估计
+  adv_estimator: grpo
+
+  # 组内归一化
+  norm_adv_by_std_in_grpo: true
+
+  # KL惩罚配置
+  use_kl_in_reward: false
+  kl_penalty: low_var_kl
+
+  kl_ctrl:
+    type: fixed
+    kl_coef: 0.001
+
+# ============================================
+# GSPO特有配置
+# ============================================
+gspo:
+  # 自对弈配置
+  self_play:
+    # 自对弈轮数
+    rounds: 3
+
+    # 是否使用历史版本对弈
+    use_historical_versions: false
+
+    # 历史版本保留数量
+    max_historical_versions: 5
+
+  # 偏好学习配置
+  preference:
+    # 偏好优化温度 (类似DPO的beta)
+    beta: 0.1
+
+    # 是否使用排序损失
+    use_ranking_loss: true
+
+    # 排序边界
+    margin: 0.1
+
+    # 损失类型: pairwise/listwise
+    loss_type: pairwise
+
+  # 采样策略
+  sampling:
+    # 每个prompt采样数
+    n_samples: 8
+
+    # 采样温度
+    temperature: 0.9
+
+    # Top-P采样
+    top_p: 0.95
+
+    # 是否使用多样性采样
+    use_diverse_sampling: true
+
+# ============================================
+# 模型配置
+# ============================================
+actor_rollout_ref:
+  model:
+    path: ${oc.env:MODEL_PATH,Qwen/Qwen2.5-0.5B}
+    tokenizer_path: null
+    trust_remote_code: false
+    enable_gradient_checkpointing: true
+    use_remove_padding: true
+
+    # LoRA配置（可选）
+    lora_rank: 0
+    lora_alpha: 16
+    target_modules: all-linear
+
+  # Actor配置
+  actor:
+    strategy: fsdp
+    grad_clip: 1.0
+
+    optim:
+      lr: 1e-6
+      weight_decay: 0.01
+
+    ppo_mini_batch_size: 64
+    ppo_micro_batch_size_per_gpu: 8
+    ppo_epochs: 1
+
+    # KL损失
+    use_kl_loss: true
+    kl_loss_coef: 0.001
+    kl_loss_type: low_var_kl
+
+    # 损失聚合
+    loss_agg_mode: token-mean
+
+    fsdp_config:
+      param_offload: false
+      optimizer_offload: false
+
+  # 推理配置
+  rollout:
+    name: vllm
+    mode: async
+    n: 8                                  # 每prompt采样数
+    temperature: 0.9
+    top_k: -1
+    top_p: 0.95
+    prompt_length: ${data.max_prompt_length}
+    response_length: ${data.max_response_length}
+    tensor_model_parallel_size: 2
+    gpu_memory_utilization: 0.6
+    log_prob_micro_batch_size_per_gpu: 160
+
+  # Reference Model配置
+  ref:
+    log_prob_micro_batch_size_per_gpu: 160
+    fsdp_config:
+      param_offload: true
+
+# ============================================
+# Critic配置 (GSPO不需要)
+# ============================================
+critic:
+  enable: false
+
+# ============================================
+# 自定义Reward Function配置
+# ============================================
+custom_reward_function:
+  path: ./reward_func.py
+  name: compute_score
+  reward_kwargs:
+    correct_score: 1.0
+    partial_score: 0.5
+    format_score: 0.1
+    wrong_score: 0.0
+
+# ============================================
+# 训练配置
+# ============================================
+trainer:
+  total_epochs: 15
+  n_gpus_per_node: 8
+  nnodes: 1
+  save_freq: 20
+  test_freq: 5
+  project_name: verl_gspo
+  experiment_name: gspo_experiment
+  logger:
+    - console
+  default_local_dir: ./outputs/checkpoints
+  device: cuda

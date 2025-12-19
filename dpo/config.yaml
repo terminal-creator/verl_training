@@ -1,0 +1,159 @@
+# ============================================
+# DPO (Direct Preference Optimization) 配置文件
+# ============================================
+# DPO特点:
+# - 使用偏好对数据直接优化策略
+# - 不需要显式的Reward Model
+# - 离线训练方法
+# ============================================
+
+# ============================================
+# 数据配置
+# ============================================
+data:
+  train_files: ${oc.env:TRAIN_DATA,./data/example_dpo.parquet}
+  val_files: null
+
+  # 数据字段映射
+  prompt_key: prompt
+  chosen_key: chosen
+  rejected_key: rejected
+
+  # 长度限制
+  max_length: 2048
+  max_prompt_length: 512
+
+  # 数据预处理
+  truncation_mode: keep_end  # keep_start/keep_end
+
+# ============================================
+# 模型配置
+# ============================================
+model:
+  # 策略模型路径
+  path: ${oc.env:MODEL_PATH,Qwen/Qwen2.5-0.5B}
+
+  # 参考模型路径 (默认与策略模型相同)
+  ref_model_path: null
+
+  # 模型设置
+  trust_remote_code: false
+  torch_dtype: bfloat16
+
+  # 梯度检查点
+  gradient_checkpointing: true
+
+  # LoRA配置 (可选)
+  use_lora: false
+  lora_config:
+    r: 8
+    lora_alpha: 16
+    target_modules:
+      - q_proj
+      - v_proj
+      - k_proj
+      - o_proj
+    lora_dropout: 0.05
+    bias: none
+
+# ============================================
+# DPO算法配置
+# ============================================
+dpo:
+  # Beta: DPO温度参数
+  # 较大的beta -> 更接近参考模型
+  # 较小的beta -> 更积极地优化偏好
+  beta: 0.1
+
+  # 损失类型
+  # sigmoid: 标准DPO (推荐)
+  # hinge: 铰链损失
+  # ipo: 身份偏好优化
+  loss_type: sigmoid
+
+  # 标签平滑
+  label_smoothing: 0.0
+
+  # 是否使用参考模型的log概率
+  reference_free: false
+
+  # RPO (相对偏好优化) 设置
+  rpo_alpha: null  # 设置非null启用RPO
+
+# ============================================
+# 训练配置
+# ============================================
+training:
+  # 训练轮数
+  num_train_epochs: 3
+
+  # 批大小
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 4
+
+  # 学习率
+  learning_rate: 5e-7
+  lr_scheduler_type: cosine
+  warmup_ratio: 0.1
+
+  # 正则化
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+
+  # 精度
+  bf16: true
+  tf32: true
+
+  # 保存和日志
+  logging_steps: 10
+  save_steps: 500
+  save_total_limit: 3
+  eval_steps: 500
+
+  # 输出目录
+  output_dir: ./outputs/checkpoints
+
+  # 报告
+  report_to:
+    - tensorboard
+    # - wandb
+
+# ============================================
+# 分布式训练配置
+# ============================================
+distributed:
+  # DeepSpeed配置 (可选)
+  deepspeed: null  # 或指定deepspeed配置文件路径
+
+  # FSDP配置 (可选)
+  fsdp: null
+
+  # 多GPU设置
+  local_rank: -1
+
+# ============================================
+# SimPO变体配置 (可选)
+# ============================================
+# SimPO是DPO的简化版本，不需要参考模型
+simpo:
+  enable: false
+  gamma: 0.5      # 目标奖励边际
+  beta: 2.0       # SimPO温度
+
+# ============================================
+# ORPO变体配置 (可选)
+# ============================================
+# ORPO将SFT和偏好优化合并
+orpo:
+  enable: false
+  beta: 0.1
+
+# ============================================
+# KTO变体配置 (可选)
+# ============================================
+# KTO只需要正例或负例标签，不需要成对
+kto:
+  enable: false
+  beta: 0.1
+  desirable_weight: 1.0
+  undesirable_weight: 1.0

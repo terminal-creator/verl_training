@@ -1,0 +1,102 @@
+[
+  {
+    "prompt": "请一步一步解答：小明有15个苹果，他给了小红7个，又从商店买了12个。现在小明有多少个苹果？",
+    "ground_truth": "20",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "计算下面的数学表达式：(24 + 36) ÷ 4 - 5 = ?",
+    "ground_truth": "10",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个农场有鸡和兔共35只，数它们的脚有94只。问有多少只鸡，多少只兔？请列出解题步骤。",
+    "ground_truth": "23",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "小华的存钱罐里有5角、1元和2元的硬币共15枚，总价值为18元5角。其中1元硬币有8枚，求5角硬币有多少枚？",
+    "ground_truth": "3",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一列火车从A站开往B站，全程360公里。火车先以每小时60公里的速度行驶了2小时，剩下的路程用每小时80公里的速度行驶，问全程用了多少小时？",
+    "ground_truth": "5",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "甲乙两人同时从相距120公里的两地相向而行，甲每小时走15公里，乙每小时走10公里，几小时后两人相遇？",
+    "ground_truth": "4.8",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个长方形的周长是36厘米，已知长是宽的2倍，求长方形的面积。",
+    "ground_truth": "72",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "把一根绳子对折3次后，从中间剪一刀，绳子被剪成多少段？",
+    "ground_truth": "9",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "1+2+3+...+99+100等于多少？请给出计算过程。",
+    "ground_truth": "5050",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "有一堆苹果，第一天卖掉一半多2个，第二天卖掉剩下的一半多1个，还剩1个。原来有多少个苹果？",
+    "ground_truth": "10",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "某商品原价100元，先提价20%，再降价20%，现价是多少元？",
+    "ground_truth": "96",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一项工程，甲单独做需要10天，乙单独做需要15天，两人合作需要多少天完成？",
+    "ground_truth": "6",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "从1到100的整数中，能被3整除但不能被5整除的数有多少个？",
+    "ground_truth": "27",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个等差数列，首项是3，公差是2，求前10项的和。",
+    "ground_truth": "120",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "圆的半径增加20%，面积增加百分之多少？",
+    "ground_truth": "44",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "某班有50名学生，数学成绩的平均分是75分，其中男生30人平均分80分，女生的平均分是多少分？",
+    "ground_truth": "67.5",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个三位数，百位数字是3，十位数字是个位数字的2倍，且这个三位数是9的倍数。求这个三位数。",
+    "ground_truth": "324",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "小明每分钟走50米，小红每分钟走40米。两人同时从学校出发，小明向东走，小红向西走，10分钟后两人相距多少米？",
+    "ground_truth": "900",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个数的3倍加上5等于26，求这个数。",
+    "ground_truth": "7",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一桶油，第一次用去全部的1/4，第二次用去剩下的1/3，这时桶里还有6千克油，原来桶里有多少千克油？",
+    "ground_truth": "12",
+    "data_source": "math_reasoning"
+  }
+]

@@ -1,0 +1,192 @@
+# ============================================
+# PPO (Proximal Policy Optimization) 配置文件
+# ============================================
+
+defaults:
+  - _self_
+
+# ============================================
+# 数据配置
+# ============================================
+data:
+  train_files: ${oc.env:TRAIN_DATA,./data/example_ppo.parquet}
+  val_files: null
+  train_batch_size: 256
+  max_prompt_length: 512
+  max_response_length: 512
+  prompt_key: prompt
+  reward_fn_key: data_source
+  filter_overlong_prompts: false
+  truncation: error
+
+# ============================================
+# PPO算法配置
+# ============================================
+algorithm:
+  # 优势估计器: gae (需要Critic), grpo (不需要Critic)
+  adv_estimator: gae
+
+  # GAE参数
+  gamma: 1.0        # 折扣因子
+  lam: 0.95         # GAE lambda
+
+  # 优势归一化
+  norm_adv_by_std_in_grpo: true
+
+  # KL惩罚配置
+  use_kl_in_reward: false
+  kl_penalty: low_var_kl  # kl/abs/mse/low_var_kl
+
+  # KL控制器
+  kl_ctrl:
+    type: fixed      # fixed/adaptive
+    kl_coef: 0.001   # KL系数
+    horizon: 10000   # 自适应KL的地平线
+    target_kl: 0.1   # 目标KL
+
+  # 策略过滤PPO (可选)
+  use_pf_ppo: false
+
+# ============================================
+# 模型配置
+# ============================================
+actor_rollout_ref:
+  model:
+    path: ${oc.env:MODEL_PATH,Qwen/Qwen2.5-0.5B}
+    tokenizer_path: null
+    trust_remote_code: false
+    enable_gradient_checkpointing: true
+    use_remove_padding: true
+    enable_activation_offload: false
+
+    # LoRA配置 (可选)
+    lora_rank: 0
+    lora_alpha: 16
+    target_modules: all-linear
+
+  # Actor配置
+  actor:
+    strategy: fsdp
+    grad_clip: 1.0
+
+    optim:
+      lr: 1e-6
+      weight_decay: 0.01
+      lr_warmup_steps_ratio: 0.0
+
+    # PPO超参数
+    ppo_mini_batch_size: 64
+    ppo_micro_batch_size_per_gpu: 8
+    ppo_epochs: 1
+    clip_ratio: 0.2
+
+    # KL损失 (PPO通常不使用，GRPO使用)
+    use_kl_loss: false
+    kl_loss_coef: 0.001
+    kl_loss_type: low_var_kl
+
+    # 损失聚合模式
+    loss_agg_mode: token-mean
+
+    # FSDP配置
+    fsdp_config:
+      param_offload: false
+      optimizer_offload: false
+      ulysses_sequence_parallel_size: 1
+
+  # 推理配置
+  rollout:
+    name: vllm                           # vllm/sglang/hf
+    mode: async
+    n: 1                                  # 每个prompt采样数
+    temperature: 1.0
+    top_k: -1
+    top_p: 1
+    prompt_length: ${data.max_prompt_length}
+    response_length: ${data.max_response_length}
+    tensor_model_parallel_size: 1
+    gpu_memory_utilization: 0.5
+    log_prob_micro_batch_size_per_gpu: 32
+
+  # Reference Model配置
+  ref:
+    log_prob_micro_batch_size_per_gpu: 32
+    fsdp_config:
+      param_offload: false
+
+# ============================================
+# Critic配置 (PPO必需)
+# ============================================
+critic:
+  enable: true                            # GAE需要Critic
+  strategy: fsdp
+
+  optim:
+    lr: 1e-5
+    weight_decay: 0.01
+
+  ppo_mini_batch_size: 64
+  ppo_micro_batch_size_per_gpu: 8
+  ppo_epochs: 1
+  cliprange_value: 0.5                   # 值函数裁剪范围
+
+  model:
+    # Critic可以使用独立模型或与Actor共享
+    path: ${actor_rollout_ref.model.path}
+    enable_gradient_checkpointing: true
+
+  fsdp_config:
+    param_offload: false
+    optimizer_offload: false
+
+# ============================================
+# Reward Model配置 (可选)
+# ============================================
+reward_model:
+  enable: false                           # 设为true启用RM
+  use_reward_loop: true
+  reward_manager: naive
+
+  model:
+    # Reward Model路径
+    path: ${oc.env:REWARD_MODEL_PATH,}
+    trust_remote_code: false
+
+  rollout:
+    name: vllm
+    tensor_model_parallel_size: 1
+    gpu_memory_utilization: 0.5
+
+# ============================================
+# 自定义Reward Function配置
+# ============================================
+custom_reward_function:
+  # 自定义奖励函数文件路径
+  path: null
+  # 函数名称
+  name: compute_score
+  # 额外参数
+  reward_kwargs: {}
+
+# ============================================
+# 训练配置
+# ============================================
+trainer:
+  total_epochs: 15
+  total_training_steps: null
+
+  n_gpus_per_node: 8
+  nnodes: 1
+
+  save_freq: 20
+  test_freq: 5
+
+  project_name: verl_ppo
+  experiment_name: ppo_experiment
+
+  logger:
+    - console
+    # - wandb
+
+  default_local_dir: ./outputs/checkpoints
+  device: cuda

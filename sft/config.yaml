@@ -1,0 +1,123 @@
+# ============================================
+# SFT (Supervised Fine-Tuning) 配置文件
+# ============================================
+# 使用方法:
+# python3 -m verl.trainer.main_sft --config-path=/path/to/this --config-name=config
+
+defaults:
+  - _self_
+
+# ============================================
+# 数据配置
+# ============================================
+data:
+  # 训练数据路径 (Parquet格式)
+  train_files: ${oc.env:TRAIN_DATA,./data/example_sft.parquet}
+  # 验证数据路径 (可选)
+  val_files: null
+  # 最大序列长度
+  max_length: 2048
+  # 提示词字段名
+  prompt_key: prompt
+  # 回复字段名
+  response_key: response
+  # 是否过滤过长样本
+  filter_overlong_prompts: true
+  # 截断策略: error/left/right
+  truncation: right
+
+# ============================================
+# 模型配置
+# ============================================
+actor_rollout_ref:
+  model:
+    # 模型路径 (HuggingFace模型ID或本地路径)
+    path: ${oc.env:MODEL_PATH,Qwen/Qwen2.5-0.5B}
+    # Tokenizer路径 (默认与模型相同)
+    tokenizer_path: null
+    # 是否信任远程代码
+    trust_remote_code: false
+    # 启用梯度检查点 (节省显存)
+    enable_gradient_checkpointing: true
+    # 移除padding以提高效率
+    use_remove_padding: true
+    # 启用激活卸载 (极端显存优化)
+    enable_activation_offload: false
+
+    # LoRA配置 (设置lora_rank>0启用)
+    lora_rank: 0
+    lora_alpha: 16
+    target_modules: all-linear
+
+  # Actor配置
+  actor:
+    # 分布式策略: fsdp/fsdp2/megatron
+    strategy: fsdp
+    # 梯度裁剪
+    grad_clip: 1.0
+
+    # 优化器配置
+    optim:
+      lr: 2e-5
+      weight_decay: 0.01
+      lr_warmup_steps_ratio: 0.1
+      # 学习率调度器: cosine/linear/constant
+      lr_scheduler_type: cosine
+
+    # 批大小配置
+    ppo_mini_batch_size: 256
+    ppo_micro_batch_size_per_gpu: 4
+
+    # FSDP配置
+    fsdp_config:
+      # 参数卸载到CPU (极端显存优化)
+      param_offload: false
+      # 优化器状态卸载到CPU
+      optimizer_offload: false
+      # 序列并行大小
+      ulysses_sequence_parallel_size: 1
+
+# ============================================
+# 训练配置
+# ============================================
+trainer:
+  # 总训练轮数 (epochs)
+  total_epochs: 3
+  # 或使用总步数 (二选一)
+  total_training_steps: null
+
+  # GPU配置
+  n_gpus_per_node: 1
+  nnodes: 1
+
+  # 保存和日志
+  save_freq: 500          # 每N步保存检查点
+  test_freq: 100          # 每N步评估
+
+  # 项目信息
+  project_name: verl_sft
+  experiment_name: sft_experiment
+
+  # 日志后端: console/wandb/tensorboard
+  logger:
+    - console
+
+  # 检查点保存目录
+  default_local_dir: ./outputs/checkpoints
+
+  # 设备
+  device: cuda
+
+# ============================================
+# 高级配置
+# ============================================
+# 混合精度训练
+mixed_precision:
+  enabled: true
+  dtype: bf16  # bf16/fp16
+
+# 数据加载
+dataloader:
+  num_workers: 4
+  pin_memory: true
+  prefetch_factor: 2

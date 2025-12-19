@@ -1,0 +1,59 @@
+# ============================================
+# verl训练框架依赖
+# ============================================
+
+# 核心框架
+verl>=0.6.0
+torch>=2.0.0
+transformers>=4.40.0
+datasets>=2.18.0
+
+# 分布式训练
+ray>=2.41.0
+accelerate>=0.27.0
+
+# 推理引擎 (选择一个)
+vllm>=0.8.5
+# sglang>=0.5.5
+
+# 配置管理
+hydra-core>=1.3.0
+omegaconf>=2.3.0
+
+# 数据处理
+pandas>=2.0.0
+pyarrow>=15.0.0
+numpy>=1.24.0
+openpyxl>=3.1.0  # Excel文件支持
+
+# 参数高效微调
+peft>=0.10.0
+
+# 日志和监控
+wandb>=0.16.0
+tensorboard>=2.15.0
+
+# 监控面板
+gradio>=4.0.0
+plotly>=5.18.0
+
+# DPO训练 (可选)
+trl>=0.8.0
+
+# 数学验证 (可选)
+# math-verify>=0.1.0
+
+# 代码执行 (可选)
+# sandbox-fusion>=0.1.0
+
+# 工具库
+tqdm>=4.66.0
+rich>=13.0.0
+pyyaml>=6.0.0
+requests>=2.31.0  # API调用
+
+# Flash Attention (可选，需要单独安装)
+# flash-attn>=2.5.0
+
+# Liger融合核心 (可选)
+# liger-kernel>=0.1.0

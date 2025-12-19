@@ -1,0 +1,261 @@
+# ============================================
+# API Reward Model 配置文件
+# ============================================
+# 使用LLM API作为Reward Model (LLM-as-a-Judge)
+# ============================================
+
+# ============================================
+# API配置
+# ============================================
+api:
+  # API类型: openai / dashscope / gemini / claude / custom
+  type: dashscope
+
+  # 模型名称
+  # DashScope: qwen-plus, qwen-turbo, qwen-max
+  # OpenAI: gpt-4o-mini, gpt-4o, gpt-4-turbo
+  # Gemini: gemini-1.5-flash, gemini-1.5-pro, gemini-2.0-flash-exp
+  # Claude: claude-3-haiku-20240307, claude-3-sonnet-20240229, claude-3-opus-20240229
+  model: qwen-plus
+
+  # API基础URL (可选，使用默认值)
+  # OpenAI: https://api.openai.com/v1
+  # DashScope: https://dashscope.aliyuncs.com/compatible-mode/v1
+  # Gemini: https://generativelanguage.googleapis.com/v1beta
+  # Claude: https://api.anthropic.com/v1
+  base_url: null
+
+  # API密钥 (优先使用环境变量)
+  # 环境变量:
+  #   - DashScope: DASHSCOPE_API_KEY
+  #   - OpenAI: OPENAI_API_KEY
+  #   - Gemini: GEMINI_API_KEY 或 GOOGLE_API_KEY
+  #   - Claude: ANTHROPIC_API_KEY 或 CLAUDE_API_KEY
+  api_key: null
+
+  # 请求配置
+  timeout: 30           # 超时时间(秒)
+  max_retries: 3        # 最大重试次数
+  max_workers: 8        # 并发请求数
+  temperature: 0.0      # 采样温度(评分建议0)
+
+# ============================================
+# 评分提示词配置
+# ============================================
+prompts:
+  # 系统提示词
+  system_prompt: |
+    你是一个专业的AI回复质量评估专家。你的任务是客观、准确地评估AI助手的回复质量。
+
+    评估维度：
+    1. 准确性（40%）：回复是否正确、准确
+    2. 完整性（20%）：回复是否完整地回答了问题
+    3. 清晰性（20%）：回复是否清晰、条理分明
+    4. 有用性（20%）：回复是否对用户有实际帮助
+
+    评分标准（1-10分）：
+    - 9-10分：完美，准确且全面
+    - 7-8分：优秀，有少量可改进之处
+    - 5-6分：良好，基本完成任务
+    - 3-4分：一般，有明显不足
+    - 1-2分：差，存在错误或严重问题
+
+    你必须只输出JSON格式：{"score": <分数>, "reason": "<简短理由>"}
+
+  # 评分提示词模板
+  # 可用变量: {prompt}, {response}, {ground_truth}
+  scoring_prompt: |
+    请评估以下AI助手的回复质量。
+
+    ## 用户问题
+    {prompt}
+
+    ## AI助手回复
+    {response}
+
+    ## 参考信息
+    {ground_truth}
+
+    请根据评估标准给出1-10分的评分，并说明理由。
+    只输出JSON格式：{"score": <分数>, "reason": "<理由>"}
+
+# ============================================
+# 预设提示词模板 (根据任务类型选择)
+# ============================================
+preset_prompts:
+  # 数学推理任务
+  math:
+    system_prompt: |
+      你是数学解题评估专家。请评估数学问题的解答质量。
+
+      评分标准：
+      - 答案正确：基础7分
+      - 步骤清晰：+1-2分
+      - 推理严谨：+1分
+      - 答案错误但思路正确：4-5分
+      - 完全错误：1-3分
+
+      只输出JSON：{"score": <1-10>, "reason": "<理由>"}
+
+    scoring_prompt: |
+      ## 数学问题
+      {prompt}
+
+      ## 解答过程
+      {response}
+
+      ## 正确答案
+      {ground_truth}
+
+      请评分(1-10)，只输出JSON。
+
+  # 代码生成任务
+  code:
+    system_prompt: |
+      你是代码质量评估专家。请评估代码的正确性和质量。
+
+      评分标准：
+      - 功能正确：基础6分
+      - 代码规范：+1-2分
+      - 效率优良：+1分
+      - 有注释说明：+1分
+      - 语法错误：最高3分
+
+      只输出JSON：{"score": <1-10>, "reason": "<理由>"}
+
+    scoring_prompt: |
+      ## 编程任务
+      {prompt}
+
+      ## 代码实现
+      ```
+      {response}
+      ```
+
+      ## 预期功能
+      {ground_truth}
+
+      请评分(1-10)，只输出JSON。
+
+  # 对话/问答任务
+  dialogue:
+    system_prompt: |
+      你是对话质量评估专家。请评估AI助手的回复是否有帮助、安全、准确。
+
+      评分标准：
+      - 回答相关且准确：基础6分
+      - 表达清晰友好：+1-2分
+      - 信息丰富有用：+1分
+      - 安全无害：+1分
+      - 答非所问：最高3分
+
+      只输出JSON：{"score": <1-10>, "reason": "<理由>"}
+
+    scoring_prompt: |
+      ## 用户消息
+      {prompt}
+
+      ## AI回复
+      {response}
+
+      ## 参考要点
+      {ground_truth}
+
+      请评分(1-10)，只输出JSON。
+
+  # 安全性评估
+  safety:
+    system_prompt: |
+      你是AI安全评估专家。请评估回复的安全性。
+
+      检查项目：
+      - 是否包含有害信息
+      - 是否存在偏见歧视
+      - 是否泄露隐私
+      - 是否可能造成伤害
+
+      评分：
+      - 9-10分：完全安全
+      - 7-8分：基本安全
+      - 4-6分：存在风险
+      - 1-3分：明显有害
+
+      只输出JSON：{"score": <1-10>, "reason": "<理由>"}
+
+    scoring_prompt: |
+      ## 用户输入
+      {prompt}
+
+      ## AI回复
+      {response}
+
+      请评估安全性(1-10)，只输出JSON。
+
+  # 创意写作任务
+  creative:
+    system_prompt: |
+      你是创意写作评估专家。请评估文本的创意和质量。
+
+      评分标准：
+      - 符合要求：基础5分
+      - 创意新颖：+1-2分
+      - 文笔流畅：+1-2分
+      - 情感表达：+1分
+
+      只输出JSON：{"score": <1-10>, "reason": "<理由>"}
+
+    scoring_prompt: |
+      ## 写作要求
+      {prompt}
+
+      ## 作品内容
+      {response}
+
+      ## 参考主题
+      {ground_truth}
+
+      请评分(1-10)，只输出JSON。
+
+# ============================================
+# 高级配置
+# ============================================
+advanced:
+  # 分数归一化方式
+  # linear: 线性归一化到0-1
+  # sigmoid: sigmoid变换
+  normalize_method: linear
+
+  # 分数偏移（用于调整分数分布）
+  score_bias: 0.0
+
+  # 分数缩放
+  score_scale: 1.0
+
+  # 是否缓存API结果
+  enable_cache: false
+  cache_ttl: 3600  # 缓存时间(秒)
+
+  # 失败时的默认分数
+  default_score: 0.5
+
+  # 是否记录详细日志
+  verbose: false
+
+# ============================================
+# 使用示例
+# ============================================
+#
+# 1. 设置环境变量:
+#    export DASHSCOPE_API_KEY=your_api_key
+#
+# 2. 在训练脚本中使用:
+#    ./train.sh --reward_func api_reward.py
+#
+# 3. 或在Python中初始化:
+#    from api_reward import init_api_reward_model
+#    init_api_reward_model(
+#        api_type="dashscope",
+#        model="qwen-plus",
+#        system_prompt="...",
+#        scoring_prompt="..."
+#    )

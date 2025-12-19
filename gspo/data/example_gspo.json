@@ -1,0 +1,102 @@
+[
+  {
+    "prompt": "请详细解答：一个水池有两个进水管和一个出水管。单独开第一个进水管6小时可以注满水池，单独开第二个进水管8小时可以注满水池，单独开出水管12小时可以把满池水放完。如果三个管同时打开，多少小时可以注满水池？",
+    "ground_truth": "8",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "解方程组：\nx + y = 10\n2x - y = 5\n\n请给出详细的求解过程。",
+    "ground_truth": "5",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个圆柱形水桶，底面直径是20厘米，高是30厘米。这个水桶最多能装多少升水？（π取3.14）",
+    "ground_truth": "9.42",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "甲、乙两车同时从A、B两地相向而行，甲车每小时行60公里，乙车每小时行40公里，两车相遇后继续前进，当甲车到达B地时，乙车离A地还有50公里，A、B两地相距多少公里？",
+    "ground_truth": "250",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "将1到100的整数相加，但要跳过所有3的倍数。求和是多少？",
+    "ground_truth": "3417",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个工厂计划30天完成一批订单，实际每天比计划多生产20件，结果提前5天完成任务，还多生产了100件。原计划每天生产多少件？",
+    "ground_truth": "100",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "某商品按原价的80%出售，仍可获利20%，若该商品的进价是100元，原价是多少元？",
+    "ground_truth": "150",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一列数：1, 1, 2, 3, 5, 8, 13, ... 这是斐波那契数列。求第15个数是多少？",
+    "ground_truth": "610",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "有一堆棋子，把它们4个4个地数，剩1个；5个5个地数，也剩1个；6个6个地数，还是剩1个。这堆棋子至少有多少个？",
+    "ground_truth": "61",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个长方体的长、宽、高分别是6厘米、4厘米和3厘米。将它锯成两个小长方体，表面积最多增加多少平方厘米？",
+    "ground_truth": "48",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "小明从家到学校，如果每分钟走60米，就会迟到5分钟；如果每分钟走80米，就会早到5分钟。小明家到学校有多少米？",
+    "ground_truth": "2400",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个两位数，十位数字与个位数字之和是9，如果把这个两位数的十位数字与个位数字对调，新数比原数大27，求原来的两位数。",
+    "ground_truth": "36",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个分数，分子加上3等于1/2，分母加上7等于1/3。原来的分数是多少？（答案写成小数形式）",
+    "ground_truth": "0.4",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "某班学生参加植树活动，如果每人种5棵树，还剩14棵；如果每人种7棵树，就缺4棵。这个班有多少名学生？",
+    "ground_truth": "9",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个等腰三角形的周长是36厘米，其中一条边长12厘米。这个等腰三角形的腰长可能是多少厘米？（如有多个答案，给出最小的那个）",
+    "ground_truth": "12",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "1×2×3×4×...×20的结果末尾有多少个连续的0？",
+    "ground_truth": "4",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一桶油连桶重15千克，用去一半油后，连桶重8.5千克。原来桶里有多少千克油？",
+    "ground_truth": "13",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "甲数是乙数的3倍，甲数与乙数的和是48，甲数是多少？",
+    "ground_truth": "36",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "一个正方形的边长增加2厘米后，面积增加了20平方厘米。原正方形的边长是多少厘米？",
+    "ground_truth": "4",
+    "data_source": "math_reasoning"
+  },
+  {
+    "prompt": "买3支铅笔和5本练习本共花18元，买同样的6支铅笔和2本练习本也是18元。每支铅笔多少元？",
+    "ground_truth": "2",
+    "data_source": "math_reasoning"
+  }
+]
