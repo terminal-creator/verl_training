@@ -21,19 +21,19 @@
 ```bash
 # 1. 克隆verl仓库
 git clone https://github.com/volcengine/verl.git
-cd verl
 
-# 2. 将本训练框架放在verl目录下（推荐）
+# 2. 将本训练框架与verl目录并列放置（推荐）
 # 目录结构应该是:
-# verl/
-# ├── verl/                 # verl源码
-# ├── examples/             # verl官方示例
-# ├── verl_training/        # 本训练框架 <-- 放在这里
-# │   ├── sft/
-# │   ├── ppo/
-# │   ├── grpo/
+# your_workspace/
+# ├── verl/                 # verl仓库
+# │   ├── verl/             # verl源码
+# │   ├── examples/         # verl官方示例
 # │   └── ...
-# └── ...
+# └── verl_training/        # 本训练框架 <-- 与verl并列
+#     ├── sft/
+#     ├── ppo/
+#     ├── grpo/
+#     └── ...
 
 # 或者也可以放在任意位置，只要安装了verl包即可
 ```
@@ -45,8 +45,10 @@ cd verl
 conda create -n verl python=3.10 -y
 conda activate verl
 
-# 2. 安装verl（在verl仓库根目录下）
+# 2. 安装verl（进入verl仓库目录）
+cd verl
 pip install -e .
+cd ..
 
 # 3. 进入训练框架目录，安装额外依赖
 cd verl_training
