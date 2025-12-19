@@ -16,21 +16,47 @@
 
 ## 快速开始
 
-### 第一步：环境配置
+### 第一步：克隆verl并放置训练框架
+
+```bash
+# 1. 克隆verl仓库
+git clone https://github.com/volcengine/verl.git
+cd verl
+
+# 2. 将本训练框架放在verl目录下（推荐）
+# 目录结构应该是:
+# verl/
+# ├── verl/                 # verl源码
+# ├── examples/             # verl官方示例
+# ├── verl_training/        # 本训练框架 <-- 放在这里
+# │   ├── sft/
+# │   ├── ppo/
+# │   ├── grpo/
+# │   └── ...
+# └── ...
+
+# 或者也可以放在任意位置，只要安装了verl包即可
+```
+
+### 第二步：环境配置
 
 ```bash
 # 1. 创建conda环境
 conda create -n verl python=3.10 -y
 conda activate verl
 
-# 2. 一键安装依赖
+# 2. 安装verl（在verl仓库根目录下）
+pip install -e .
+
+# 3. 进入训练框架目录，安装额外依赖
+cd verl_training
 ./setup_env.sh
 
 # 或手动安装
 pip install -r requirements.txt
 ```
 
-### 第二步：准备数据
+### 第三步：准备数据
 
 每种训练方法的数据格式略有不同，参见各子目录的README。
 
@@ -43,7 +69,7 @@ json_to_parquet('data.json', 'data.parquet')
 "
 ```
 
-### 第三步：开始训练
+### 第四步：开始训练
 
 每个训练脚本顶部都有清晰的配置区域，修改配置后直接运行即可：
 
@@ -63,7 +89,7 @@ cd gspo && ./train.sh
 
 > **注意**: 所有配置都在脚本文件内的"配置区域"修改，不支持命令行参数。
 
-### 第四步：监控训练
+### 第五步：监控训练
 
 ```bash
 # 启动监控面板
